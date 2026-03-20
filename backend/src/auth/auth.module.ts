@@ -3,7 +3,6 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { UsersModule } from 'src/users/users.module';
 import { JwtModule } from '@nestjs/jwt';
-import { jwtConstants } from './constants';
 import { MailModule } from 'src/mail/mail.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
@@ -16,8 +15,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         global: true,
-        secret: config.get<string>('jwt.secret'),
-        signOptions: { expiresIn: '1d' },
+        secret: config.get<string>('jwt.accessSecret'),
+        signOptions: { expiresIn: '15m' },
       }),
     }),
   ],

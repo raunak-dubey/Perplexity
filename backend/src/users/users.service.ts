@@ -24,4 +24,20 @@ export class UsersService {
   async getUserByEmail(email: string) {
     return await this.userModel.findOne({ email });
   }
+
+  async getUserByEmailWithPassword(email: string) {
+    return await this.userModel
+      .findOne({ email })
+      .select('+password +refreshToken');
+  }
+
+  async getUserById(userId: string) {
+    return await this.userModel.findById(userId).select('+refreshToken');
+  }
+
+  async updateRefreshToken(userId: string, hashedToken: string | null) {
+    return await this.userModel.findByIdAndUpdate(userId, {
+      refreshToken: hashedToken,
+    });
+  }
 }

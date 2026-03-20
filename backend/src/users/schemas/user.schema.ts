@@ -11,7 +11,7 @@ export class User {
   @Prop({ required: true, unique: true, lowercase: true, trim: true })
   email!: string;
 
-  @Prop({ required: true, minLength: 8, maxLength: 250 })
+  @Prop({ required: true, minLength: 8, maxLength: 250, select: false })
   password!: string;
 
   @Prop({ default: false })
@@ -22,6 +22,9 @@ export class User {
 
   @Prop()
   emailVerificationExpires?: Date;
+
+  @Prop({ select: false })
+  refreshToken?: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

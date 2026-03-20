@@ -12,8 +12,6 @@ export class MailService {
   async sendVerificationEmail(email: string, token: string): Promise<void> {
     const appUrl = this.configService.get<string>('app.url');
     const verifyUrl = `${appUrl}/auth/verify?token=${token}`;
-    console.log('url', verifyUrl);
-    console.log(email, 'email');
 
     await this.resendService.send({
       from: 'onboarding@resend.dev',
