@@ -4,10 +4,10 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { UsersService } from 'src/users/users.service';
+import { UserService } from 'src/user/user.service';
 import { RegisterUserDto } from './dto/registerUser.dto';
 import { LoginUserDto } from './dto/loginUser.dto';
-import * as bcrypt from 'bcrypt'; // ← fix: default import fails at runtime
+import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { MailService } from 'src/mail/mail.service';
 import { ConfigService } from '@nestjs/config';
@@ -15,7 +15,7 @@ import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly usersService: UsersService,
+    private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly mailService: MailService,
     private readonly config: ConfigService,
@@ -44,7 +44,7 @@ export class AuthService {
     refreshToken: string,
   ): Promise<void> {
     const hashed = await bcrypt.hash(refreshToken, 12);
-    await this.usersService.updateRefreshToken(userId, hashed);
+    await this.userService.updateRefreshToken(userId, hashed);
   }
 
   // ─── Register ─────────────────────────────────────────────────────────────
@@ -69,7 +69,7 @@ export class AuthService {
     const hashedToken = await bcrypt.hash(verificationToken, saltRounds);
     const emailVerificationExpires = new Date(Date.now() + 3600000);
 
-    await this.usersService.createUser({
+    await this.userService.createUser({
       ...registerUserDto,
       password: hashedPassword,
       verified: false,
@@ -101,7 +101,7 @@ export class AuthService {
       throw new BadRequestException('Invalid or expired token');
     }
 
-    const user = await this.usersService.getUserByEmail(payload.email);
+    const user = await this.userService.getUserByEmail(payload.email);
     if (
       !user ||
       !user.emailVerificationToken ||
@@ -135,7 +135,7 @@ export class AuthService {
   }> {
     const { email, password } = loginUserDto;
 
-    const user = await this.usersService.getUserByEmailWithPassword(email);
+    const user = await this.userService.getUserByEmailWithPassword(email);
     if (!user) {
       throw new UnauthorizedException('Invalid credentials. Please try again.');
     }
@@ -180,14 +180,14 @@ export class AuthService {
       throw new UnauthorizedException('Invalid or expired token');
     }
 
-    const user = await this.usersService.getUserById(payload.sub);
+    const user = await this.userService.getUserById(payload.sub);
     if (!user || !user.refreshToken) {
       throw new UnauthorizedException('Invalid session. Please login again.');
     }
 
     const tokenMatch = await bcrypt.compare(refreshToken, user.refreshToken);
     if (!tokenMatch) {
-      await this.usersService.updateRefreshToken(user._id.toString(), null);
+      await this.userService.updateRefreshToken(user._id.toString(), null);
       throw new ForbiddenException('Invalid refresh token.');
     }
 
@@ -209,7 +209,7 @@ export class AuthService {
           secret: this.config.get<string>('jwt.refreshSecret'),
         },
       );
-      await this.usersService.updateRefreshToken(payload.sub, null);
+      await this.userService.updateRefreshToken(payload.sub, null);
     } catch {
       // intentionally ignored
     }

@@ -9,17 +9,21 @@ import {
   Req,
   Res,
   UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common';
 import { RegisterUserDto } from './dto/registerUser.dto';
 import { LoginUserDto } from './dto/loginUser.dto';
 import { AuthService } from './auth.service';
 import { ConfigService } from '@nestjs/config';
 import type { FastifyRequest, FastifyReply } from 'fastify';
+import { AuthGuard } from './auth.guard';
+import { UserService } from 'src/user/user.service';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
+    private readonly userService: UserService,
     private readonly config: ConfigService,
   ) {}
 
@@ -95,6 +99,15 @@ export class AuthController {
     this.setRefreshCookie(reply, result.newRefreshToken);
 
     return { accessToken: result.accessToken };
+  }
+
+  // ─── Profile (get-me) ─────────────────────────────────────────────────────
+  @UseGuards(AuthGuard)
+  @Get('profile')
+  async getProfile(@Req() req: FastifyRequest) {
+    const reqUser = req['user'] as { sub: string };
+    const user = await this.userService.getUserById(reqUser.sub);
+    return user;
   }
 
   // ─── Logout ───────────────────────────────────────────────────────────────
