@@ -105,8 +105,7 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @Get('profile')
   async getProfile(@Req() req: FastifyRequest) {
-    const reqUser = req['user'] as { sub: string };
-    const user = await this.userService.getUserById(reqUser.sub);
+    const user = await this.userService.getUserById(req.user?.sub ?? '');
     return user;
   }
 

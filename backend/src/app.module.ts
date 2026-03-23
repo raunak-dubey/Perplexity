@@ -7,6 +7,9 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import configuration from './config/configuration';
 import { validationSchema } from './config/validation';
+import { IdeaModule } from './idea/idea.module';
+import { EvaluationModule } from './evaluation/evaluation.module';
+import { AiModule } from './ai/ai.module';
 
 @Module({
   imports: [
@@ -23,6 +26,9 @@ import { validationSchema } from './config/validation';
     }),
     AuthModule,
     UserModule,
+    IdeaModule,
+    EvaluationModule,
+    AiModule,
   ],
   controllers: [AppController],
   providers: [AppService],

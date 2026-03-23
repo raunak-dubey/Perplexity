@@ -8,6 +8,15 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import type { FastifyRequest } from 'fastify';
 
+declare module 'fastify' {
+  interface FastifyRequest {
+    user?: {
+      sub: string;
+      email: string;
+    };
+  }
+}
+
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
@@ -21,13 +30,15 @@ export class AuthGuard implements CanActivate {
     if (!token) {
       throw new UnauthorizedException('Access token missing');
     }
-    let payload: { sub: string };
     try {
-      payload = await this.jwtService.verifyAsync(token, {
+      const payload = await this.jwtService.verifyAsync<{
+        sub: string;
+        email: string;
+      }>(token, {
         secret: this.config.get<string>('jwt.accessSecret'),
       });
 
-      request['user'] = payload;
+      request.user = payload;
     } catch {
       throw new UnauthorizedException('Invalid or expired token');
     }
@@ -35,7 +46,9 @@ export class AuthGuard implements CanActivate {
   }
 
   private extractTokenFromHeader(request: FastifyRequest): string | undefined {
-    const [type, token] = request.headers.authorization?.split(' ') ?? [];
+    const auth = request.headers.authorization;
+    if (!auth) return undefined;
+    const [type, token] = auth.split(' ');
     return type === 'Bearer' ? token : undefined;
   }
 }

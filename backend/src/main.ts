@@ -11,7 +11,8 @@ import { ConfigService } from '@nestjs/config';
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
-    new FastifyAdapter({ logger: true }),
+    // new FastifyAdapter({ logger: true }),
+    new FastifyAdapter(),
   );
 
   const config = app.get(ConfigService);

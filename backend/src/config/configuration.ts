@@ -17,4 +17,7 @@ export default () => ({
   cookie: {
     secret: process.env.COOKIE_SECRET,
   },
+  google: {
+    apiKey: process.env.GOOGLE_API_KEY,
+  },
 });
