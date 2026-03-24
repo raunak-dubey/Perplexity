@@ -18,7 +18,7 @@ export class AuthService {
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly mailService: MailService,
-    private readonly config: ConfigService,
+    private readonly configService: ConfigService,
   ) {}
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
@@ -27,11 +27,11 @@ export class AuthService {
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
-        secret: this.config.get<string>('jwt.accessSecret'),
+        secret: this.configService.get<string>('jwt.accessSecret'),
         expiresIn: '15m',
       }),
       this.jwtService.signAsync(payload, {
-        secret: this.config.get<string>('jwt.refreshSecret'),
+        secret: this.configService.get<string>('jwt.refreshSecret'),
         expiresIn: '7d',
       }),
     ]);
@@ -61,7 +61,7 @@ export class AuthService {
     const verificationToken = await this.jwtService.signAsync(
       { email: registerUserDto.email },
       {
-        secret: this.config.get<string>('jwt.accessSecret'),
+        secret: this.configService.get<string>('jwt.accessSecret'),
         expiresIn: '1h',
       },
     );
@@ -95,7 +95,7 @@ export class AuthService {
     let payload: { email: string };
     try {
       payload = await this.jwtService.verifyAsync(token, {
-        secret: this.config.get<string>('jwt.accessSecret'),
+        secret: this.configService.get<string>('jwt.accessSecret'),
       });
     } catch {
       throw new BadRequestException('Invalid or expired token');
@@ -174,7 +174,7 @@ export class AuthService {
     let payload: { sub: string; email: string };
     try {
       payload = await this.jwtService.verifyAsync(refreshToken, {
-        secret: this.config.get<string>('jwt.refreshSecret'),
+        secret: this.configService.get<string>('jwt.refreshSecret'),
       });
     } catch {
       throw new UnauthorizedException('Invalid or expired token');
@@ -206,7 +206,7 @@ export class AuthService {
       const payload = await this.jwtService.verifyAsync<{ sub: string }>(
         refreshToken,
         {
-          secret: this.config.get<string>('jwt.refreshSecret'),
+          secret: this.configService.get<string>('jwt.refreshSecret'),
         },
       );
       await this.userService.updateRefreshToken(payload.sub, null);

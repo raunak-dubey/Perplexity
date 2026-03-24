@@ -24,13 +24,13 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly userService: UserService,
-    private readonly config: ConfigService,
+    private readonly configService: ConfigService,
   ) {}
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
 
   private get isProduction(): boolean {
-    return this.config.get<string>('nodeEnv') === 'production';
+    return this.configService.get<string>('nodeEnv') === 'production';
   }
 
   private setRefreshCookie(reply: FastifyReply, token: string): void {
